@@ -24,6 +24,9 @@ def main():
 	names = ['Yeast-APMS','Yeast-LC','Yeast-Y2H','Fly','HIPPIE'] #This is from the HW2 Handout
 	files = ['Yeast_Combined_APMS.txt','Yeast_LC_Multiple.txt','Yeast_Y2H_Union.txt','Fly_Unpublished.txt',
 	'HIPPIE_Unweighted.txt']
+
+	#all of the following lists are used to compile lists or dictionaries from all 5 datasets so that  
+	#the code can run through them all automatically.
 	master_node_list = []
 	master_DDict_list = []
 	kAND_list = []
@@ -167,7 +170,7 @@ def plot_k(kList_List, AvgCvList_List, names): #From HW2 instructions
 	fig = plt.figure(figsize=(6.5,4)) # make a 6.5" wide by 4" tall figure
 	for i in range(len(kList_List)):
 		plt.plot(kList_List[i], AvgCvList_List[i],node_style_list[i], label=names[i])
-	plt.xlim(0,100)
+	plt.xlim(0,5)
 	plt.legend(loc='upper right')
 	plt.xlabel('k')
 	plt.ylabel('Avg C(v)')
@@ -310,8 +313,9 @@ def ClusterCo(nodes, edges, NDict, DDict, knodeDict):
 					edgesum = edgesum + 1 #adds 1 for every edge between neighbors
 					seen.add((u,w))#to make sure that edges aren't counted multiple times
 		denom = (DDict[node] * (DDict[node]-1))
-		if denom == 0:
-			Cv = 0
+		if denom == 0: #this is just to prevent a divide by 0 error. 
+			Cv = 0 #technically it might be more correct for Cv to equal 1 (because if denom = 0 then there is only 1 neighbor and by default 0 edges and 0/0 =1).
+			#  However I feel that that is just conceptually bad even if it's technically correct because an interactome with many single nodes would appear to be highly clustered.
 		else:
 			Cv = edgesum/denom
 		ClustDict[node] = Cv #Adding Cv to node->Cv dictionary
@@ -340,7 +344,7 @@ Calculates the shortest path from node_s to every other node.
 Output = D, dictionary of pathlength of every node from node_s
 '''
 def shortest_paths(node_list, edge_list, adj_list, node_s):
-	D={}
+	D={} #a dictionary of shortest paths from a node,s, to every other node.
 	for node in node_list:
 		D[node] = 100 #sets the layer to 1000
 	D[node_s] = 0 #sets the layer of node_s to 0 since it is the starting node
@@ -382,11 +386,17 @@ def HistoInput(listoflists,names):
 	print('wrote to ', Histoname)
 	return 
 
+'''
+This function produces a list of lists of degrees for every dataset
+Inputs: nodelist (a list of lists of nodes), and DDict (a list of dictionaries node->degree)
+Outputs: a list of lists of degrees for all five datasets
+'''
 def DList_List_Maker(nodelist, DDict):
 	for n in nodelist[i]: #for all the nodes in a singl dataset
 		value = DDict[i][n] #the degree of that node
 		Dlist.append(value) #adding the degree to the list
 	listofdlists = listofdlists + [Dlist] #adding list of degrees to a list of lists
+	return listofdlists
 
 '''
 Input = PathDict_list (a list of dictionaries of dictionaries) and names (a list of dataset names)
@@ -408,5 +418,4 @@ def HistoFixo(PathDict_list, names):
 		pathlists_list.append(pathlist)
 	return pathlists_list
 
-
-main()
+main() #calls the main function so that the code will run.
